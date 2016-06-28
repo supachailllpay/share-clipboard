@@ -1,0 +1,90 @@
+<link rel='import' href='../bower_components/polymer/polymer.html'>
+<link rel='import' href='../bower_components/app-route/app-location.html'>
+<link rel='import' href='../bower_components/app-route/app-route.html'>
+<link rel='import' href='../bower_components/polymerfire/firebase-app.html'>
+<link rel='import' href='../bower_components/polymerfire/firebase-auth.html'>
+<link rel='import' href='../bower_components/polymerfire/firebase-document.html'>
+
+<link rel='import' href='path-input.html'>
+<link rel='import' href='clipboard-input.html'>
+<link rel='import' href='style-variable.html'>
+
+<dom-module id='share-clipboard'>
+  <template>
+
+    <firebase-app
+      auth-domain='share-clipboard-856f7.firebaseapp.com'
+      database-url='https://share-clipboard-856f7.firebaseio.com'
+      api-key='AIzaSyB1c3iN3sV13j1KYuHMvT1_wTdqRpDjEFA'>
+    </firebase-app>
+
+    <firebase-auth
+      provider=''>
+    </firebase-auth>
+
+    <app-location
+      route='{{route}}'>
+    </app-location>
+
+    <app-route
+      route='{{route}}'
+      pattern='/:path'
+      data='{{routeData}}'>
+    </app-route>
+
+    <firebase-document
+      path='[[path]]'
+      data='{{text}}'>
+    </firebase-document>
+
+    <path-input
+      path='[[path]]'
+      on-update='updatePath'>
+    </path-input>
+
+    <clipboard-input
+      text='{{text}}'>
+    </clipboard-input>
+
+  </template>
+  <script>
+
+    Polymer({
+      is: 'share-clipboard',
+
+      properties: {
+        route: {
+          type: Object
+        },
+        routeData: {
+          type: Object
+        },
+        path: {
+          type: String
+        },
+        text: {
+          type: String
+        }
+      },
+
+      observers: [
+        'routePathChanged(routeData.path)'
+      ],
+
+      routePathChanged: function (path) {
+        var isEmpty = path === '';
+        this.path = isEmpty ? null : path;
+        this.toggleAttribute('fullscreen', isEmpty, this.$$('path-input'));
+      },
+
+      updatePath: function (event) {
+        this.$$('app-location').path = event.detail.path;
+      },
+
+      ready: function () {
+        this.$$('firebase-auth').signInAnonymously();
+      }
+    });
+
+  </script>
+</dom-module>
